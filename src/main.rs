@@ -77,23 +77,6 @@ fn draw_bar(canvas: &mut Canvas<Window>, x: i32, y: i32) {
         .unwrap();
 }
 
-fn calc_ball_mov(ball_pos: &mut Position, velocity: &mut Velocity) {
-    let mut new_x_mov = ball_pos.x + velocity.x * BALL_SPEED * DELTA_TIME_SEC;
-    if new_x_mov < 0.0 || new_x_mov + BALL_SIZE as f32 > WIDTH as f32 {
-        velocity.x = -velocity.x;
-        new_x_mov = ball_pos.x + velocity.x * BALL_SPEED * DELTA_TIME_SEC;
-    }
-
-    let mut new_y_mov = ball_pos.y + velocity.y * BALL_SPEED * DELTA_TIME_SEC;
-    if new_y_mov < 0.0 || new_y_mov + BALL_SIZE as f32 > HEIGHT as f32 {
-        velocity.y = -velocity.y;
-        new_y_mov = ball_pos.y + velocity.y * BALL_SPEED * DELTA_TIME_SEC;
-    }
-
-    ball_pos.x = new_x_mov;
-    ball_pos.y = new_y_mov;
-}
-
 fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_system = sdl_context.video().unwrap();
@@ -144,18 +127,6 @@ fn main() {
                         bar_x_pos = new_bar
                     }
                 }
-                // Event::KeyDown {
-                //     keycode: Some(Keycode::W),
-                //     ..
-                // } => {
-                //     bar_y_pos -= BAR_SPEED * DELTA_TIME_SEC;
-                // }
-                // Event::KeyDown {
-                //     keycode: Some(Keycode::S),
-                //     ..
-                // } => {
-                //     bar_y_pos += BAR_SPEED * DELTA_TIME_SEC;
-                // }
                 _ => {}
             }
         }
