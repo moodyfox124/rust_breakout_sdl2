@@ -13,9 +13,27 @@ const BALL_SPEED: f32 = 400.0;
 const BALL_SIZE: u32 = 50;
 
 const BAR_WIDTH: u32 = 200;
-const BAR_HIEGHT: u32 = 30;
+const BAR_HEIGHT: u32 = 30;
 
 const BAR_SPEED: f32 = 600.0;
+
+struct Rectangle {
+    velocity: Velocity,
+    position: Position,
+    size: Size,
+    color: Color,
+}
+
+impl Rectangle {
+    fn new(velocity: Velocity, position: Position, size: Size, color: Color) -> Self {
+        Self {
+            velocity,
+            position,
+            size,
+            color,
+        }
+    }
+}
 
 struct Velocity {
     x: f32,
@@ -56,24 +74,27 @@ impl Position {
     }
 }
 
-fn draw_ball(canvas: &mut Canvas<Window>, ball_pos: &Position) {
-    canvas.set_draw_color(Color::RGB(255, 0, 0));
+struct Size {
+    width: u32,
+    height: u32,
+}
+
+impl Size {
+    fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+}
+
+fn draw(canvas: &mut Canvas<Window>, ball_pos: &Position, size: &Size, color: &Color) {
+    canvas.set_draw_color(color.clone());
 
     canvas
         .fill_rect(Rect::new(
             ball_pos.x as i32,
             ball_pos.y as i32,
-            BALL_SIZE,
-            BALL_SIZE,
+            size.width,
+            size.height,
         ))
-        .unwrap();
-}
-
-fn draw_bar(canvas: &mut Canvas<Window>, x: i32, y: i32) {
-    canvas.set_draw_color(Color::RGB(50, 200, 0));
-
-    canvas
-        .fill_rect(Rect::new(x, y, BAR_WIDTH, BAR_HIEGHT))
         .unwrap();
 }
 
@@ -88,15 +109,22 @@ fn main() {
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
-
     let mut event_pump = sdl_context.event_pump().unwrap();
 
-    let mut ball_position = Position::new(0.0, 0.0);
+    let mut ball = Rectangle::new(
+        Velocity::new(1.0, 1.0),
+        Position::new(0.0, 0.0),
+        Size::new(BALL_SIZE, BALL_SIZE),
+        Color::RGB(255, 0, 0),
+    );
 
-    let mut bar_x_pos: f32 = (WIDTH - BAR_WIDTH) as f32 / 2.0;
-    let bar_y_pos: f32 = (HEIGHT - BAR_HIEGHT) as f32 - 40.0;
+    let mut bar_position = Position::new(
+        (WIDTH - BAR_WIDTH) as f32 / 2.0,
+        (HEIGHT - BAR_HEIGHT) as f32 - 40.0,
+    );
 
-    let mut ball_velocity = Velocity::new(1.0, 1.0);
+    let bar_size = Size::new(BAR_WIDTH, BAR_HEIGHT);
+    let bar_color = Color::RGB(50, 200, 0);
 
     'mainloop: loop {
         canvas.set_draw_color(Color::RGB(0, 0, 0));
@@ -113,29 +141,29 @@ fn main() {
                     keycode: Some(Keycode::D),
                     ..
                 } => {
-                    let new_bar = bar_x_pos + BAR_SPEED * DELTA_TIME_SEC;
+                    let new_bar = bar_position.x + BAR_SPEED * DELTA_TIME_SEC;
                     if !(new_bar < -1.0 || new_bar + BAR_WIDTH as f32 > WIDTH as f32) {
-                        bar_x_pos = new_bar
+                        bar_position.x = new_bar
                     }
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::A),
                     ..
                 } => {
-                    let new_bar = bar_x_pos - BAR_SPEED * DELTA_TIME_SEC;
+                    let new_bar = bar_position.x - BAR_SPEED * DELTA_TIME_SEC;
                     if !(new_bar < -1.0 || new_bar + BAR_WIDTH as f32 > WIDTH as f32) {
-                        bar_x_pos = new_bar
+                        bar_position.x = new_bar
                     }
                 }
                 _ => {}
             }
         }
 
-        draw_bar(&mut canvas, bar_x_pos as i32, bar_y_pos as i32);
+        draw(&mut canvas, &bar_position, &bar_size, &bar_color);
 
-        ball_position.calc_position(&mut ball_velocity);
+        ball.position.calc_position(&mut ball.velocity);
 
-        draw_ball(&mut canvas, &ball_position);
+        draw(&mut canvas, &ball.position, &ball.size, &ball.color);
 
         canvas.present();
 
